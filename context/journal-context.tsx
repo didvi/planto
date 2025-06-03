@@ -22,21 +22,18 @@ type JournalContextType = {
 const JournalContext = createContext<JournalContextType | undefined>(undefined)
 
 export const JournalProvider = ({ children }: { children: React.ReactNode }) => {
-  const [entries, setEntries] = useState<JournalEntry[]>([])
-
-  // Load entries from localStorage on initial render
-  useEffect(() => {
-    const savedEntries = localStorage.getItem("journalEntries")
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries))
-    } else {
-      // Set initial sample entries if none exist
-      setEntries(sampleEntries)
+  const [entries, setEntries] = useState<JournalEntry[]>(() => {
+    if (typeof window !== "undefined") {
+      const savedEntries = localStorage.getItem("journalEntries")
+      if (savedEntries) {
+        return JSON.parse(savedEntries)
+      }
       localStorage.setItem("journalEntries", JSON.stringify(sampleEntries))
     }
-  }, [])
+    return sampleEntries
+  })
 
-  // Save entries to localStorage whenever they change
+  // Persist entries to localStorage whenever they change
   useEffect(() => {
     if (entries.length > 0) {
       localStorage.setItem("journalEntries", JSON.stringify(entries))
